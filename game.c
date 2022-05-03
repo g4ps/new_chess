@@ -46,6 +46,11 @@ int *possible_moves(int p1, char *board)
   return NULL;
 }
 
+int** possible_moves_player(char *board)
+{
+  
+}
+
 int is_attacked(int pos, int color, char *board)
 {
   int current_color = current_turn_color(board);
