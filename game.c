@@ -243,9 +243,15 @@ char* init_chess_board()
 }
 
 
-void play()
+void play(int log_fd, char *starting_pos)
 {
-  char *board = init_chess_board();
+  char *board = starting_pos;
+  t_move best_move;
+  int p1;
+  int p2;
+  char *start;
+  if (! board)
+    board = init_chess_board();
   while(1) {
     //Printing color of the current player
 
@@ -269,29 +275,47 @@ void play()
     printf(" material: %f\n", material_eval(board));
     print_board(board);
 
-    printf("AI thinks, that the best move is: ");
-    t_move best_move = dumb_get_move(board);
-    print_move(best_move, board);
-    printf("\n");
+    if (turn_color == 0) {
+      best_move = dumb_get_move(board);
+      printf("AI thinks, that the best move is: ");
+      print_move(best_move, board);
+      printf("\n");
+      p1 = best_move.start;
+      p2 = best_move.end;
+      start = calloc(sizeof(char), 10);
+      start[0] = best_move.start % 8 + 'a';
+      start[1] = best_move.start / 8 + '0';
+      start[3] = ' ';
+      start[4] = best_move.end % 8 + 'a';
+      start[5] = best_move.end / 8 + '0';
+      start[6] = '\0';
+    }
+    else {
+      // reading move in form "e4 e5"
+      start = NULL;
+      do {
+	free(start);
+	start = readline("> ");
+	if (start == NULL)
+	  exit(0);
+      } while (strlen(start) < 5);
 
-    // reading move in form "e4 e5"
-    char *start = NULL;
-    do {
-      free(start);
-      start = readline("> ");
-      if (start == NULL)
-        exit(0);
-    } while (strlen(start) < 5);
+      //Morphing moves into positions
+      p1 = strpos_to_int(start);    
+      p2 = strpos_to_int(start + 3);
+      if (p1 < 0 || p2 < 0)
+	continue;
+      printf("INPUT: %s\n", start);
+    }
 
-    //Morphing moves into positions
-    int p1 = strpos_to_int(start);    
-    int p2 = strpos_to_int(start + 3);
 
-    if (p1 < 0 || p2 < 0)
-      continue;
-    printf("INPUT: %s\n", start);
+
+
+    if (log_fd > 0) {
+      write(log_fd, start, strlen(start));
+      write(log_fd, "\n", 1);
+    }
     free(start);
-
     //Making sure there is a piece on starting position
     if (!isalpha(board[p1])) {
       char *t = int_to_strpos(p1);

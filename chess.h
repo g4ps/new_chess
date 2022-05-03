@@ -29,7 +29,7 @@ int move_piece_on_board(char *p1, char *p2, char *board);
 int is_check(char *board);
 void print_board(char *board);
 char* init_chess_board();
-void play();
+void play(int, char *);
 int is_attacked(int pos, int color, char *board);
 int* king_attacks(int, char*);
 
@@ -42,9 +42,15 @@ t_move_list* all_possible_moves(char *board);
 void print_moves_list(char*, t_move_list *);
 
 float material_eval(char *board);
+float activity_eval(char *board);
+
+float complex_eval(char *board);
+
 float dumb_eval(char *board, int max_depth);
+
 t_move dumb_get_move(char *board);
 
 void print_move(t_move move, char *board);
+
 
 #endif

@@ -8,6 +8,8 @@
 #include "chess.h"
 #include "list.h"
 
+const int VERBOSE_TOP_EVAL = 1;
+
 float material_eval(char *board)
 {
   float ret = 0;
@@ -43,17 +45,33 @@ float material_eval(char *board)
   return ret;
 }
 
+float activity_eval(char *board)
+{
+  t_move_list *move_list = all_possible_moves(board);
+  int len = move_list_len(move_list);
+  delete_list(move_list);
+  return len;
+}
+
+float complex_eval(char *board)
+{
+  int color = current_turn_color(board);
+  color = color * -2 + 1;
+  return 1.0 * material_eval(board) + 0.05 * activity_eval(board) * color;
+}
+
 float dumb_eval(char *board, int max_depth)
 {
   //getting a couple of current stats
-  float curr_mat_eval = material_eval(board);
   int turn_color = current_turn_color(board);
+  float curr_mat_eval = complex_eval(board);
+
   
   //if checkmate, then we return some very large value
   if (is_checkmate(board)) {
     if (turn_color)
-      return -1000;
-    return 1000;
+      return 1000;
+    return -1000;
   }
 
   //if we have reached maximum depth, then we should leave
@@ -104,41 +122,57 @@ t_move dumb_get_move(char *board)
 {
   int turn_color = current_turn_color(board);
 
-  int max_depth = 3;
+  int max_depth = 2;
 
   
   t_move ret = {-1, -1};
   
   t_move_list *move_list = all_possible_moves(board);
+  if (VERBOSE_TOP_EVAL) {
+    printf("------------------------\n");
+    printf("All moves in current positions are:\n\t");
+    print_moves_list(board, move_list);
+    printf("\n");
+  }
   t_move_list *st;
   if (!move_list)
     return ret;
 
   float max_eval;
   int init = 1;  
-  for (st = move_list; st; st = st->next) {    
+  for (st = move_list; st; st = st->next) {
+
     char *temp_board = get_board_copy(board);
     if (!temp_board)
       return ret;
     
     make_legal_move(st->move->start, st->move->end, temp_board);
-    toggle_move(board);
+    toggle_move(temp_board);
     
     float curr_eval = dumb_eval(temp_board, max_depth);
+    if (VERBOSE_TOP_EVAL) {
+      printf("\t");
+      print_move(*(st->move), board);
+      printf(" -- %f\n", curr_eval);
+    }
     free(temp_board);
     if (turn_color == 0) {
-      if (curr_eval < max_eval || init) {
-	max_eval = curr_eval;
-	ret = *(st->move);
-      }
-    }
-    else {
       if (curr_eval > max_eval || init) {
 	max_eval = curr_eval;
 	ret = *(st->move);
       }
     }
+    else {
+      if (curr_eval < max_eval || init) {
+	max_eval = curr_eval;
+	ret = *(st->move);
+      }
+    }
     init = 0;    
+  }
+  if (VERBOSE_TOP_EVAL) {
+    printf("Best is %f\n", max_eval);
+    printf("------------------------\n");
   }
   delete_list(move_list);
   return ret;
