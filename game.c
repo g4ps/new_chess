@@ -46,6 +46,54 @@ int *possible_moves(int p1, char *board)
   return NULL;
 }
 
+int is_attacked(int pos, int color, char *board)
+{
+  int current_color = current_turn_color(board);
+  for (int i = 0; i < 64; i++) {
+    char square = board[i];
+    if (square == '_')
+      continue;
+    if ((color == 0 && strchr("PRNBQK", square)) ||
+        (color == 1 && strchr("prnbqk", square))
+        ) {
+      square = tolower(square);
+      int* p_moves;
+      switch(square) {
+      case 'p':
+        p_moves = pawn_attacks(i, board);
+        break;
+      case 'r':
+        p_moves = rook_can_move(i, board);
+        break;
+      case 'n':
+        p_moves = knight_can_move(i, board);
+        break;
+      case 'b':
+        p_moves = bishop_can_move(i, board);
+        break;
+      case 'q':
+        p_moves = queen_can_move(i, board);
+        break;
+      case 'k':
+        p_moves = king_can_move(i, board);
+        break;
+      default:
+        break;
+      }
+
+      for (int j = 0; j < 64 && p_moves
+             && p_moves[j] >= 0; j++) {
+        if (pos == p_moves[j]) {
+          free(p_moves);
+          return 1;
+        }
+      }
+      free(possible_moves);
+    }
+  }
+  return 0;
+}
+
 int is_check(char *board)
 {
   int current_color = current_turn_color(board);
@@ -53,47 +101,7 @@ int is_check(char *board)
   if (current_color == 1)
     king_char = 'K';
   int king_pos = strchr(board, king_char) - board;
-  for (int i = 0; i < 64; i++) {
-    char square = board[i];
-    if (square == '_')
-      continue;
-    if ((current_color == 0 && strchr("PRNBQK", square)) ||
-        (current_color == 1 && strchr("prnbqk", square))
-        ) {
-      square = tolower(square);
-      int* possible_moves;
-      switch(square) {
-      case 'p':
-        possible_moves = pawn_attacks(i, board);
-        break;
-      case 'r':
-        possible_moves = rook_can_move(i, board);
-        break;
-      case 'n':
-        possible_moves = knight_can_move(i, board);
-        break;
-      case 'b':
-        possible_moves = bishop_can_move(i, board);
-        break;
-      case 'q':
-        possible_moves = queen_can_move(i, board);
-        break;
-      case 'k':
-        possible_moves = king_can_move(i, board);
-        break;
-      default:
-        break;
-      }
-
-      for (int i = 0; i < 64 && possible_moves
-             && possible_moves[i] >= 0; i++) {
-        if (king_pos == possible_moves[i])
-          return 1;
-      }
-      free(possible_moves);
-    }
-  }
-  return 0;
+  return is_attacked(king_pos, current_color, board);
 }
 
 char* init_chess_board()
@@ -103,15 +111,15 @@ char* init_chess_board()
     return NULL;
 
   
-  /* char *inboard  = */
-  /*   "rnbqkbnr" */
-  /*   "pppppppp" */
-  /*   "________" */
-  /*   "________" */
-  /*   "________" */
-  /*   "________" */
-  /*   "PPPPPPPP" */
-  /*   "RNBQKBNR"; */
+  char *inboard  =
+    "rnbqkbnr"
+    "pppppppp"
+    "________"
+    "________"
+    "________"
+    "________"
+    "PPPPPPPP"
+    "RNBQKBNR";
 
   /* char *inboard  = */
   /*   "_____b__" */
@@ -133,15 +141,15 @@ char* init_chess_board()
   /*   "RNBQKBNR"; */
 
   
-  char *inboard  =
-    "rnbqkbnr"
-    "_pppp__p"
-    "p____p__"
-    "______pQ"
-    "________"
-    "____P___"
-    "PPPP_PPP"
-    "RNB_KBNR";
+  /* char *inboard  = */
+  /*   "rnbqkbnr" */
+  /*   "_pppp__p" */
+  /*   "p____p__" */
+  /*   "______pQ" */
+  /*   "________" */
+  /*   "____P___" */
+  /*   "PPPP_PPP" */
+  /*   "RNB_KBNR"; */
   
   /* char *inboard  = */
   /*   "rn_qkbnr" */
