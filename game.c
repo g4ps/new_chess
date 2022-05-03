@@ -160,7 +160,7 @@ int is_checkmate(char *board)
       free(piece_move);
     }
   }
-  return 1;
+  return 1 && is_check(board);
 }
 
 char* init_chess_board()
@@ -266,11 +266,18 @@ void play()
     if (is_check(board)) {
       printf("CHECK!\n");
     }
+    printf(" material: %f\n", material_eval(board));
     print_board(board);
 
+    printf("AI thinks, that the best move is: ");
+    t_move best_move = dumb_get_move(board);
+    print_move(best_move, board);
+    printf("\n");
+
     // reading move in form "e4 e5"
-    char *start = "";
+    char *start = NULL;
     do {
+      free(start);
       start = readline("> ");
       if (start == NULL)
         exit(0);
@@ -279,9 +286,11 @@ void play()
     //Morphing moves into positions
     int p1 = strpos_to_int(start);    
     int p2 = strpos_to_int(start + 3);
+
     if (p1 < 0 || p2 < 0)
       continue;
     printf("INPUT: %s\n", start);
+    free(start);
 
     //Making sure there is a piece on starting position
     if (!isalpha(board[p1])) {
@@ -320,7 +329,7 @@ void play()
 	board = t;
       }
       else {
-	printf("Can't got there; it would be check");
+	printf("Can't go there; it would be check");
 	continue;
       }
       toggle_move(board);

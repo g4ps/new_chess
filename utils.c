@@ -9,10 +9,10 @@
 
 char *get_board_copy(char *board)
 {
-  char *ret = calloc(sizeof(char), 65);
+  char *ret = calloc(sizeof(char), 66);
   if (!ret)
     return NULL;
-  memcpy(ret, board, 65);
+  memcpy(ret, board, 66);
   return ret;
 }
 
@@ -124,7 +124,7 @@ int make_legal_move(int p1, int p2, char* board)
     board[65] = p1 % 8 + 'a';
   }
   else {
-    board[65] = '\0';
+    board[65] = 0;
   }
 
   if ((tolower(piece) == 'p' && board[p2] == '_' && (p1 - p2) % 8 != 0)) { // if en-passaunt
@@ -203,6 +203,18 @@ void print_board(char *board)
     printf("\n");
   }
   printf("  a b c d e f g h \n");
+}
+
+void print_move(t_move move, char *board)
+{
+  char mv[6];
+  memset(mv, 0, 5);
+  int pos = 0;
+  if (tolower(board[move.start]) != 'p')
+    mv[pos++] = board[move.start];
+  mv[pos++] = move.end % 8 + 'a';
+  mv[pos++] = move.end / 8 + '1';
+  printf("%s", mv);
 }
 
 void print_moves_list(char *board, t_move_list *lst) {

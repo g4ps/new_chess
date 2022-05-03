@@ -1,5 +1,5 @@
 CFLAGS = -g
-SRCS = game.c   main.c   pieces.c utils.c list.c
+SRCS = game.c   main.c   pieces.c utils.c list.c aiplayer.c
 OBJS = $(SRCS:%.c=%.o)
 LIBS = $(shell pkg-config libedit --libs)
 INC = $(shell pkg-config libedit --cflags)

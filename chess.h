@@ -33,10 +33,18 @@ void play();
 int is_attacked(int pos, int color, char *board);
 int* king_attacks(int, char*);
 
+int is_checkmate(char *board);
+
 int make_legal_move(int p1, int p2, char *board);
 
 char *get_board_copy(char *);
 t_move_list* all_possible_moves(char *board);
 void print_moves_list(char*, t_move_list *);
+
+float material_eval(char *board);
+float dumb_eval(char *board, int max_depth);
+t_move dumb_get_move(char *board);
+
+void print_move(t_move move, char *board);
 
 #endif
