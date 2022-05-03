@@ -53,11 +53,28 @@ float activity_eval(char *board)
   return len;
 }
 
-float complex_eval(char *board)
+float king_safety(char *board)
 {
+  float ret = 0;
+  int color = current_turn_color(board);
+  char king = 'k';
+  if (color)
+    king = 'K';
+  int king_pos = strchr(board, king) - board;
+  int x = king_pos % 8;
+  if (x > 3)
+    x = 7 - x;
+  int y = king_pos / 8;
+  if (y > 3)
+    y = y - x;
+  return (x + y) * 1.0 / 10.0;
+}
+
+float complex_eval(char *board)
+{  
   int color = current_turn_color(board);
   color = color * -2 + 1;
-  return 1.0 * material_eval(board) + 0.05 * activity_eval(board) * color;
+  return 1.0 * material_eval(board) + 0.05 * activity_eval(board) * color + king_safety(board);
 }
 
 float dumb_eval(char *board, int max_depth)
@@ -153,7 +170,7 @@ t_move dumb_get_move(char *board)
     if (VERBOSE_TOP_EVAL) {
       printf("\t");
       print_move(*(st->move), board);
-      printf(" -- %f\n", curr_eval);
+      printf("\t-- %f\n", curr_eval);
     }
     free(temp_board);
     if (turn_color == 0) {

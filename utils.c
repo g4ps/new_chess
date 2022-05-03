@@ -192,8 +192,8 @@ void print_board(char *board)
   if (last_pawn_move)
     printf("first pawn move: %c\n", last_pawn_move);
   else
-    printf("last move was not first pawn move\n ");
-  printf(" a b c d e f g h \n");
+    printf("last move was not first pawn move\n");
+  printf("  a b c d e f g h \n");
   for (int i = 7; i >= 0; i--) {
     printf("%d ", i + 1);
     for (int j = 0; j < 8; j++) {
