@@ -6,6 +6,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "chess.h"
+#include "list.h"
 
 
 int *possible_moves(int p1, char *board)
@@ -46,10 +47,36 @@ int *possible_moves(int p1, char *board)
   return NULL;
 }
 
-int** possible_moves_player(char *board)
+t_move_list* all_possible_moves(char *board)
 {
-  
+  t_move_list *ret = NULL;
+  int curr_turn = current_turn_color(board);
+  for (int i = 0; i < 64; i++) {
+    if (is_players_piece(board[i], curr_turn)) {
+      int *moves = possible_moves(i, board);
+      if (!moves) {
+	delete_list(ret);
+	return NULL;
+      }
+      for (int j = 0; j < 64 && moves[j] >= 0; j++) {
+	char *temp_board = get_board_copy(board);
+	make_legal_move(i, moves[j], temp_board);
+	int check = is_check(temp_board);
+	free(temp_board);
+	if (!check) {
+	  if (!add_move_to_list(&ret, i, moves[j])) {
+	    delete_list(ret);
+	    return NULL;
+	  }
+	}
+      }
+      free(moves);
+    }
+  }
+  return ret;
 }
+
+
 
 int is_attacked(int pos, int color, char *board)
 {

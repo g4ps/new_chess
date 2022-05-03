@@ -1,5 +1,7 @@
 #ifndef EUG_CHESS
 
+#include "list.h"
+
 #define WHITE_KING_MOVED 0x1
 #define WHITE_KING_SIDE_ROOK_MOVED 0x2
 #define WHITE_QUEEN_SIDE_ROOK_MOVED 0x4
@@ -34,5 +36,7 @@ int* king_attacks(int, char*);
 int make_legal_move(int p1, int p2, char *board);
 
 char *get_board_copy(char *);
+t_move_list* all_possible_moves(char *board);
+void print_moves_list(char*, t_move_list *);
 
 #endif

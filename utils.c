@@ -204,3 +204,23 @@ void print_board(char *board)
   }
   printf("  a b c d e f g h \n");
 }
+
+void print_moves_list(char *board, t_move_list *lst) {
+  char mv[5];
+  int pos = 0;
+  if (!lst) {
+    printf("No moves supplied\n");
+    return;
+  }
+  while(lst) {
+    memset(mv, 0, 5);
+    pos = 0;
+    if (tolower(board[lst->move->start]) != 'p')
+      mv[pos++] = board[lst->move->start];
+    mv[pos++] = lst->move->end % 8 + 'a';
+    mv[pos++] = lst->move->end / 8 + '1';
+    printf("%s ", mv);
+    lst = lst->next;
+  }
+  printf("\n");
+}
