@@ -33,4 +33,6 @@ int* king_attacks(int, char*);
 
 int make_legal_move(int p1, int p2, char *board);
 
+char *get_board_copy(char *);
+
 #endif

@@ -101,7 +101,34 @@ int is_check(char *board)
   if (current_color == 1)
     king_char = 'K';
   int king_pos = strchr(board, king_char) - board;
+  if (king_pos < 0) {
+    return 1;
+  }
   return is_attacked(king_pos, !current_color, board);
+}
+
+int is_checkmate(char *board)
+{
+  int current_color = current_turn_color(board);
+  for (int i = 0; i < 64; i++) {
+    if (is_players_piece(board[i], current_color)) {
+      int *piece_move = possible_moves(i, board);
+      if (!piece_move)
+	exit(1);
+      for (int j = 0; j < 64 && piece_move[j] >= 0; j++) {
+	char *temp_board = get_board_copy(board);
+	make_legal_move(i, piece_move[j], temp_board);
+	int res = is_check(temp_board);
+	free(temp_board);
+	if (!res) {
+	  free(piece_move);
+	  return 0;
+	}
+      }
+      free(piece_move);
+    }
+  }
+  return 1;
 }
 
 char* init_chess_board()
@@ -122,14 +149,15 @@ char* init_chess_board()
     "RNBQKBNR";
 
   /* char *inboard  = */
-  /*   "_____b__" */
+  /*   "______k_" */
+  /*   "_____Q__" */
+  /*   "_____K__" */
   /*   "________" */
   /*   "________" */
-  /*   "____n___" */
   /*   "________" */
   /*   "________" */
-  /*   "________" */
-  /*   "__B__B__"; */
+  /*   "________"; */
+  
   /* char *inboard  = */
   /*   "rnbqkbnr" */
   /*   "________" */
@@ -188,7 +216,17 @@ void play()
   char *board = init_chess_board();
   while(1) {
     //Printing color of the current player
+
     int turn_color = current_turn_color(board);
+    if (is_checkmate(board)) {
+      printf("CHECKMATE!!\n");
+      if (turn_color == 0)
+	printf("BLACK WON\n");
+      else
+	printf("WHITE WON\n");
+      print_board(board);
+      exit(0);
+    }
     if (turn_color == 0)
       printf("WHITE\n");
     else
@@ -243,7 +281,17 @@ void play()
     free(moves);
 
     if (is_possible) {
-      make_legal_move(p1, p2, board);
+      char *t = get_board_copy(board);
+      make_legal_move(p1, p2, t);
+      if (!is_check(t)){
+	free(board);
+	board = t;
+      }
+      else {
+	printf("Can't got there; it would be check");
+	continue;
+      }
+      toggle_move(board);
     }
     else {
       char *t1 = int_to_strpos(p1);

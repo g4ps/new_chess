@@ -305,13 +305,26 @@ int *pawn_can_move(int p1, char *board)
         ) {
       if (i >= 2 && (strchr("rnbqkp", board[temp]) && color == 1 || strchr("RNBQKP", board[temp]) && color == 0))
         ret[pos++] = temp;
-      else if ((color == 0 && p1 / 8 == 1 && i == 1) ||
-               (color == 1 && p1 / 8 == 6 && i == 1) && board[temp] == '_' && board[temp + (color * 2 - 1) * 8] == '_')
+      else if (((color == 0 && p1 / 8 == 1 && i == 1) ||
+               (color == 1 && p1 / 8 == 6 && i == 1)) && board[temp] == '_' && board[p1 + (color * -2 + 1) * 8] == '_')
         ret[pos++] = temp;
       else if (board[temp] == '_' && i == 0)
         ret[pos++] = temp;
     }
   }
+
+  //handling en-passaunt
+  if ((color == 0 && p1 / 8 == 4)
+      || (color == 1 && p1 / 8 == 3)) {  // if the pawn is on correct row
+    if (p1 % 8 == board[65] - 'a' + 1 && p1 % 8 != 0) { // if the pawn is on the left
+      ret[pos++] = p1 + 7 * ((color * -2) + 1);
+    }
+    else if (p1 % 8 == board[65] - 'a' - 1 && p1 % 8 != 7) {// and on the right
+      ret[pos++] = p1 + 9 * ((color * -2) + 1);
+    }
+  }
+
+  
   return ret;
 }
 

@@ -7,6 +7,15 @@
 #include <readline/history.h>
 #include "chess.h"
 
+char *get_board_copy(char *board)
+{
+  char *ret = calloc(sizeof(char), 65);
+  if (!ret)
+    return NULL;
+  memcpy(ret, board, 65);
+  return ret;
+}
+
 
 int current_turn_color(char *board)
 {
@@ -17,6 +26,8 @@ int current_turn_color(char *board)
 
 int is_players_piece(char s, int pl)
 {
+  if (!isalpha(s))
+    return 0;
   if (islower(s) && pl == 0)
     return 1;
   if (isupper(s) && pl == 1)
@@ -109,11 +120,27 @@ int make_legal_move(int p1, int p2, char* board)
   if (piece == 'p' && p1 / 8 == 1) {
     board[65] = p1 % 8 + 'a';
   }
-  else if (piece == 'p' && p1 / 8 == 6) {
+  else if (piece == 'P' && p1 / 8 == 6) {
     board[65] = p1 % 8 + 'a';
   }
   else {
     board[65] = '\0';
+  }
+
+  if ((tolower(piece) == 'p' && board[p2] == '_' && (p1 - p2) % 8 != 0)) { // if en-passaunt
+    if (p2 > p1) { // if going forward
+      if (p1 > p2 - 8)
+	board[p1 - 1] = '_';
+      else
+	board[p1 + 1] = '_';
+    }
+    else {
+      if (p1 - p2 == 7) {
+	board[p1 - 1] = '_';
+      }
+      else
+	board[p1 + 1] = '_';
+    }
   }
   
   //white king-side castling
@@ -134,7 +161,11 @@ int make_legal_move(int p1, int p2, char* board)
     move_piece_on_board_int(56, 59, board);
   }
 
-  toggle_move(board);
+  if (p2 / 8 == 7 && piece == 'p')
+    board[p2] = 'q';
+
+  if (p2 / 8 == 0 && piece == 'P')
+    board[p2] = 'Q';
 }
 
 
@@ -158,7 +189,10 @@ void print_board(char *board)
   //Maybe make something simular to emacs chess
   printf("WKM: %d BKM: %d WKRM: %d WQRM: %d BKRM: %d BQRM: %d\n",
 	 flags[0], flags[1], flags[2], flags[3], flags[4], flags[5], flags[6]);
-  printf("last pawn move: %c\n", last_pawn_move);
+  if (last_pawn_move)
+    printf("first pawn move: %c\n", last_pawn_move);
+  else
+    printf("last move was not first pawn move\n ");
   printf("  a b c d e f g h \n");
   for (int i = 7; i >= 0; i--) {
     printf("%d ", i + 1);
