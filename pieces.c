@@ -203,12 +203,12 @@ int *king_can_move(int p1, char *board)
   //handling castling
 
   //for white
-  if (color == 0 && p1 / 8 == 0 && !(board[64] & WHITE_KING_MOVED&& ! is_attacked(strpos_to_int("e1"), !color, board))) {
+  if (color == 0 && p1 / 8 == 0 && !(board[64] & WHITE_KING_MOVED)&& ! is_attacked(strpos_to_int("e1"), !color, board)) {
     if (board[strpos_to_int("f1")] == '_' &&
         board[strpos_to_int("g1")] == '_' &&
         ! is_attacked(strpos_to_int("f1"), !color, board) &&
         ! is_attacked(strpos_to_int("g1"), !color, board) &&
-        ! (board[64] & WHITE_RIGHT_ROOK_MOVED)
+        ! (board[64] & WHITE_KING_SIDE_ROOK_MOVED)
         ) {
       ret[pos++] = strpos_to_int("g1");
     }
@@ -216,19 +216,19 @@ int *king_can_move(int p1, char *board)
         board[strpos_to_int("c1")] == '_' &&
         ! is_attacked(strpos_to_int("d1"), !color, board) &&
         ! is_attacked(strpos_to_int("c1"), !color, board) &&
-        ! (board[64] & WHITE_LEFT_ROOK_MOVED)
+        ! (board[64] & WHITE_QUEEN_SIDE_ROOK_MOVED)
         ) {
       ret[pos++] = strpos_to_int("c1");
     }
   }
 
   //for black
-  if (color == 1 && p1 / 8 == 7 && !(board[64] & BLACK_KING_MOVED&& ! is_attacked(strpos_to_int("e8"), !color, board))) {
+  if (color == 1 && p1 / 8 == 7 && !(board[64] & BLACK_KING_MOVED)&& ! is_attacked(strpos_to_int("e8"), !color, board)) {
     if (board[strpos_to_int("f8")] == '_' &&
         board[strpos_to_int("g8")] == '_' &&
         ! is_attacked(strpos_to_int("f8"), !color, board) &&
         ! is_attacked(strpos_to_int("g8"), !color, board) &&
-        ! (board[64] & WHITE_LEFT_ROOK_MOVED)
+        ! (board[64] & BLACK_KING_SIDE_ROOK_MOVED)
         ) {
       ret[pos++] = strpos_to_int("g8");
     }
@@ -236,10 +236,38 @@ int *king_can_move(int p1, char *board)
         board[strpos_to_int("c8")] == '_' &&
         ! is_attacked(strpos_to_int("d8"), !color, board) &&
         ! is_attacked(strpos_to_int("c8"), !color, board) &&
-        ! (board[64] & WHITE_RIGHT_ROOK_MOVED)
+        ! (board[64] & BLACK_QUEEN_SIDE_ROOK_MOVED)
         ) {
       ret[pos++] = strpos_to_int("c8");
     }
+  }
+  
+  return ret;
+}
+
+int *king_attacks(int p1, char *board)
+{
+  int *ret = calloc(64, sizeof(int));
+  if (!ret)
+    return NULL;
+  for (int i = 0; i < 64; i++) {
+    ret[i] = -1;    
+  }
+  int pos = 0;
+  int color = 0;
+  if (isupper(board[p1]))
+    color = 1;
+  if (p1 >= 64 || p1 < 0) //if out of bounds
+    return NULL;
+  for (int i = 0; i < 9; i++) {
+    int temp = p1 + (i / 3 - 1) * 8 + i % 3 - 1;
+    if (temp >= 0 && temp < 64)
+      if (!(
+            (p1 % 8 == 0 && i % 3 == 0) ||
+            (p1 % 8 == 7 && i % 3 == 2)) && temp != p1)
+        if (board[temp] == '_' ||
+            !is_players_piece(board[temp], color))
+          ret[pos++] = temp;
   }
   
   return ret;

@@ -84,12 +84,81 @@ int move_piece_on_board(char *p1, char *p2, char *board)
   return move_piece_on_board_int(strpos_to_int(p1), strpos_to_int(p2), board);
 }
 
+int make_legal_move(int p1, int p2, char* board)
+// for the most part this function is the same as just
+// moving the piece, but here we are taking in the consideration
+// castling and making all the changes on the board
+{
+  char piece = board[p1];
+
+  //setting all the flags for castling
+  if (piece == 'k')
+    board[64] |= WHITE_KING_MOVED;
+  if (piece == 'K')
+    board[64] |= WHITE_KING_MOVED;
+  if (piece == 'r' && p1 == 0)
+    board[64] |= WHITE_QUEEN_SIDE_ROOK_MOVED;
+  if (piece == 'r' && p1 == 7)
+    board[64] |= WHITE_KING_SIDE_ROOK_MOVED;
+  if (piece == 'R' && p1 == 63)
+    board[64] |= BLACK_KING_SIDE_ROOK_MOVED;
+  if (piece == 'R' && p1 == 56)
+    board[64] |= BLACK_QUEEN_SIDE_ROOK_MOVED;
+
+  //and en-pasaunt
+  if (piece == 'p' && p1 / 8 == 1) {
+    board[65] = p1 % 8 + 'a';
+  }
+  else if (piece == 'p' && p1 / 8 == 6) {
+    board[65] = p1 % 8 + 'a';
+  }
+  else {
+    board[65] = '\0';
+  }
+  
+  //white king-side castling
+  move_piece_on_board_int(p1, p2, board);
+  if (p1 == 4 && p2 == 6) {
+    move_piece_on_board_int(7, 5, board);
+  }
+  //white queen-side castling
+  else if (p1 == 4 && p2 == 2) {
+    move_piece_on_board_int(0, 3, board);
+  }
+  //black king-side castling
+  else if (p1 == 60 && p2 == 62) {
+    move_piece_on_board_int(63, 61, board);
+  }
+  //black queen-side castling
+  else if (p1 == 60 && p2 == 58) {
+    move_piece_on_board_int(56, 59, board);
+  }
+
+  toggle_move(board);
+}
+
 
 void print_board(char *board)
 // prints board content
 // a1 is on bottom left;
 {
+  char last_pawn_move = board[65];
+  int flags [6];
+  flags[0] = board[64] & WHITE_KING_MOVED;
+  flags[1] = board[64] & BLACK_KING_MOVED;
+  flags[2] = board[64] & WHITE_KING_SIDE_ROOK_MOVED;
+  flags[3] = board[64] & WHITE_QUEEN_SIDE_ROOK_MOVED;
+  flags[4] = board[64] & BLACK_KING_SIDE_ROOK_MOVED;
+  flags[5] = board[64] & BLACK_QUEEN_SIDE_ROOK_MOVED;
+  for (int i = 0; i < 6; i ++) {
+    if (flags[i] > 0)
+      flags[i] = 1;    
+  }
+  
   //Maybe make something simular to emacs chess
+  printf("WKM: %d BKM: %d WKRM: %d WQRM: %d BKRM: %d BQRM: %d\n",
+	 flags[0], flags[1], flags[2], flags[3], flags[4], flags[5], flags[6]);
+  printf("last pawn move: %c\n", last_pawn_move);
   printf("  a b c d e f g h \n");
   for (int i = 7; i >= 0; i--) {
     printf("%d ", i + 1);

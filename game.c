@@ -53,8 +53,8 @@ int is_attacked(int pos, int color, char *board)
     char square = board[i];
     if (square == '_')
       continue;
-    if ((color == 0 && strchr("PRNBQK", square)) ||
-        (color == 1 && strchr("prnbqk", square))
+    if ((color == 1 && strchr("PRNBQK", square)) ||
+        (color == 0 && strchr("prnbqk", square))
         ) {
       square = tolower(square);
       int* p_moves;
@@ -75,7 +75,7 @@ int is_attacked(int pos, int color, char *board)
         p_moves = queen_can_move(i, board);
         break;
       case 'k':
-        p_moves = king_can_move(i, board);
+        p_moves = king_attacks(i, board);
         break;
       default:
         break;
@@ -88,7 +88,7 @@ int is_attacked(int pos, int color, char *board)
           return 1;
         }
       }
-      free(possible_moves);
+      free(p_moves);
     }
   }
   return 0;
@@ -101,7 +101,7 @@ int is_check(char *board)
   if (current_color == 1)
     king_char = 'K';
   int king_pos = strchr(board, king_char) - board;
-  return is_attacked(king_pos, current_color, board);
+  return is_attacked(king_pos, !current_color, board);
 }
 
 char* init_chess_board()
@@ -162,6 +162,7 @@ char* init_chess_board()
   /*   "RNBQKBNR"; */
   strcpy(ret, inboard);
   ret[64] = '\0';
+  ret[65] = '\0';
   return ret;
   
   char* white = "rnbqkbnrpppppppp";
@@ -210,13 +211,22 @@ void play()
     int p2 = strpos_to_int(start + 3);
     if (p1 < 0 || p2 < 0)
       continue;
+    printf("INPUT: %s\n", start);
 
     //Making sure there is a piece on starting position
-    if (!isalpha(board[p1]))
+    if (!isalpha(board[p1])) {
+      char *t = int_to_strpos(p1);
+      printf("error: no piece at %s\n", t);
+      free(t);
       continue;
+    }
     //Making sure, that the piece is of correct color
-    if (!isupper(board[p1]) != !turn_color)
+    if (!isupper(board[p1]) != !turn_color) {
+      char *t = int_to_strpos(p1);
+      printf("error: %c is not your piece at %s\n", board[p1], t);
+      free(t);
       continue;
+    }
 
     //Looking which move is possible with current piece
     int *moves = possible_moves(p1, board);
@@ -232,11 +242,17 @@ void play()
     printf("\n");
     free(moves);
 
-    if (is_possible)
-      move_piece_on_board_int(p1, p2, board);
-    else
+    if (is_possible) {
+      make_legal_move(p1, p2, board);
+    }
+    else {
+      char *t1 = int_to_strpos(p1);
+      char *t2 = int_to_strpos(p2);      
+      printf("illegal: Can't move %c at %s to %s\n", board[p1],
+	     t1, t2);
+      free(t1);
+      free(t2);
       continue;
-    
-    toggle_move(board);
+    }
   }
 }

@@ -1,12 +1,12 @@
 #ifndef EUG_CHESS
 
 #define WHITE_KING_MOVED 0x1
-#define WHITE_LEFT_ROOK_MOVED 0x2
-#define WHITE_RIGHT_ROOK_MOVED 0x4
+#define WHITE_KING_SIDE_ROOK_MOVED 0x2
+#define WHITE_QUEEN_SIDE_ROOK_MOVED 0x4
 #define BLACK_KING_MOVED 0x8
-#define BLACK_LEFT_ROOK_MOVED 0x10
-#define BLACK_RIGHT_ROOK_MOVED 0x20
-#define TURN_COLOR 0x4
+#define BLACK_KING_SIDE_ROOK_MOVED 0x10
+#define BLACK_QUEEN_SIDE_ROOK_MOVED 0x20
+#define TURN_COLOR 0x40
 
 int current_turn_color(char *board);
 int is_players_piece(char s, int pl);
@@ -29,5 +29,8 @@ void print_board(char *board);
 char* init_chess_board();
 void play();
 int is_attacked(int pos, int color, char *board);
+int* king_attacks(int, char*);
+
+int make_legal_move(int p1, int p2, char *board);
 
 #endif
